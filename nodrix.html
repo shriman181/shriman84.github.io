@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nodrix — Document Intelligence for a Borderless World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Newsreader:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06080F;
+    --surface: #0C1018;
+    --border: #1A2030;
+    --border-light: #243040;
+    --ink: #E8EDF5;
+    --ink-muted: #7A8BA0;
+    --ink-dim: #3A4A5E;
+    --accent: #3B82F6;
+    --accent-glow: rgba(59,130,246,0.15);
+    --accent-2: #06B6D4;
+    --seal: #F59E0B;
+    --seal-glow: rgba(245,158,11,0.12);
+    --success: #10B981;
+    --danger: #EF4444;
+    --radius: 4px;
+    --radius-lg: 8px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    height: 64px;
+    background: rgba(6,8,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .nav-logo-mark {
+    width: 28px; height: 28px;
+    border: 1.5px solid var(--accent);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .nav-logo-mark::after {
+    content: '';
+    position: absolute;
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  .nav-logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+  }
+
+  .nav-logo-text span { color: var(--accent); }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--ink-muted);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  .nav-cta {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent) !important;
+    padding: 7px 18px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s !important;
+  }
+
+  .nav-cta:hover {
+    background: var(--accent) !important;
+    color: #fff !important;
+  }
+
+  /* ── SECTIONS ── */
+  section { position: relative; z-index: 1; }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 48px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border-light);
+    background: var(--surface);
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ink-muted);
+    margin-bottom: 48px;
+    width: fit-content;
+  }
+
+  .hero-badge-dot {
+    width: 6px; height: 6px;
+    background: var(--success);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--success);
+    animation: pulse-dot 2s infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .hero-headline {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(48px, 7vw, 88px);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    max-width: 800px;
+    margin-bottom: 24px;
+  }
+
+  .hero-headline em {
+    font-style: italic;
+    font-family: 'Newsreader', serif;
+    font-weight: 300;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-family: 'Newsreader', serif;
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--ink-muted);
+    max-width: 540px;
+    line-height: 1.7;
+    margin-bottom: 56px;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 14px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: opacity 0.2s, transform 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-muted);
+    border: 1px solid var(--border-light);
+    padding: 14px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: border-color 0.2s, color 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-ghost:hover { border-color: var(--ink-muted); color: var(--ink); }
+
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    margin-top: 80px;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .stat-item {}
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-num span { color: var(--accent); }
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+
+  /* ── TERMINAL ── */
+  .hero-terminal-wrap {
+    position: absolute;
+    right: 48px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 380px;
+  }
+
+  @media (max-width: 1100px) {
+    .hero-terminal-wrap { display: none; }
+  }
+
+  .terminal {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(59,130,246,0.1);
+  }
+
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+    background: var(--border);
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .t-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .t-dot.r { background: #FF5F57; }
+  .t-dot.y { background: #FFBD2E; }
+  .t-dot.g { background: #28C840; }
+
+  .terminal-title {
+    margin-left: 8px;
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .terminal-body {
+    padding: 20px;
+    font-size: 12px;
+    line-height: 1.8;
+  }
+
+  .t-line { display: flex; gap: 8px; margin-bottom: 2px; }
+  .t-prompt { color: var(--accent); }
+  .t-cmd { color: var(--ink); }
+  .t-comment { color: var(--ink-dim); font-style: italic; }
+  .t-output { color: var(--success); margin-left: 16px; }
+  .t-warn { color: var(--seal); margin-left: 16px; }
+  .t-err { color: var(--danger); margin-left: 16px; }
+  .t-info { color: var(--accent-2); margin-left: 16px; }
+
+  .t-cursor {
+    display: inline-block;
+    width: 7px; height: 14px;
+    background: var(--accent);
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* ── PROBLEM ── */
+  #problem {
+    padding: 120px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-tag {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-tag::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .section-headline {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: clamp(32px, 4vw, 52px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    max-width: 600px;
+    margin-bottom: 64px;
+  }
+
+  .section-headline em {
+    font-style: italic;
+    font-family: 'Newsreader', serif;
+    font-weight: 300;
+    color: var(--accent);
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .problem-card {
+    background: var(--surface);
+    padding: 40px 36px;
+    transition: background 0.2s;
+  }
+
+  .problem-card:hover { background: #0F1520; }
+
+  .problem-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--border-light);
+    line-height: 1;
+    margin-bottom: 20px;
+    letter-spacing: -0.04em;
+  }
+
+  .problem-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+
+  .problem-text {
+    font-size: 13px;
+    color: var(--ink-muted);
+    line-height: 1.7;
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+  }
+
+  .problem-metric {
+    margin-top: 20px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    border: 1px solid var(--accent-glow);
+    background: var(--accent-glow);
+    padding: 4px 10px;
+    border-radius: var(--radius);
+    display: inline-block;
+  }
+
+  /* ── HOW IT WORKS ── */
+  #how {
+    padding: 120px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .how-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .how-step {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr;
+    align-items: stretch;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    transition: background 0.2s;
+  }
+
+  .how-step:last-child { border-bottom: none; }
+  .how-step:hover { background: #0F1520; }
+
+  .step-num-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--border);
+    padding: 32px 0;
+  }
+
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    color: var(--border-light);
+    letter-spacing: -0.04em;
+  }
+
+  .step-content {
+    padding: 36px 40px;
+    border-right: 1px solid var(--border);
+  }
+
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+
+  .step-desc {
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+
+  .step-tech {
+    padding: 36px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .tech-tag {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 5px 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-light);
+    color: var(--ink-dim);
+    width: fit-content;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .tech-tag.blue { border-color: rgba(59,130,246,0.4); color: var(--accent); background: var(--accent-glow); }
+  .tech-tag.cyan { border-color: rgba(6,182,212,0.4); color: var(--accent-2); background: rgba(6,182,212,0.08); }
+  .tech-tag.amber { border-color: rgba(245,158,11,0.4); color: var(--seal); background: var(--seal-glow); }
+  .tech-tag.green { border-color: rgba(16,185,129,0.4); color: var(--success); background: rgba(16,185,129,0.08); }
+
+  /* ── FEATURES ── */
+  #features {
+    padding: 120px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    padding: 48px 44px;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .feature-card:hover { background: #0F1520; }
+
+  .feature-icon {
+    width: 44px; height: 44px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+    font-size: 20px;
+  }
+
+  .feature-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin-bottom: 14px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  .feature-desc {
+    font-family: 'Newsreader', serif;
+    font-size: 15px;
+    color: var(--ink-muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--ink-muted);
+    letter-spacing: 0.03em;
+  }
+
+  .feature-list li::before {
+    content: '→';
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── APOSTILLE TRACKER ── */
+  .tracker-demo {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 36px;
+    margin-top: 64px;
+  }
+
+  .tracker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .tracker-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .tracker-id {
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .tracker-timeline {
+    display: flex;
+    gap: 0;
+    position: relative;
+  }
+
+  .tracker-timeline::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0; right: 0;
+    height: 1px;
+    background: var(--border-light);
+    z-index: 0;
+  }
+
+  .track-node {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .track-dot {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--border-light);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 14px;
+  }
+
+  .track-dot.done {
+    border-color: var(--success);
+    background: rgba(16,185,129,0.12);
+  }
+
+  .track-dot.active {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+    box-shadow: 0 0 12px rgba(59,130,246,0.3);
+    animation: pulse-node 2s infinite;
+  }
+
+  @keyframes pulse-node {
+    0%, 100% { box-shadow: 0 0 12px rgba(59,130,246,0.3); }
+    50% { box-shadow: 0 0 24px rgba(59,130,246,0.5); }
+  }
+
+  .track-dot.pending {
+    border-color: var(--border-light);
+    opacity: 0.5;
+  }
+
+  .track-label {
+    font-size: 11px;
+    color: var(--ink-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .track-jurisdiction {
+    font-size: 10px;
+    color: var(--ink-dim);
+    margin-top: 3px;
+  }
+
+  /* ── FOUNDER ── */
+  #founder {
+    padding: 120px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .founder-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .founder-left {
+    background: var(--surface);
+    padding: 56px 48px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .founder-avatar {
+    width: 80px; height: 80px;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, #1A2540, #0D1828);
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 28px;
+    letter-spacing: -0.02em;
+  }
+
+  .founder-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .founder-role {
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .founder-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+  }
+
+  .founder-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--ink-dim);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    transition: color 0.2s;
+  }
+
+  .founder-link:hover { color: var(--ink-muted); }
+  .founder-link-icon { color: var(--accent); font-size: 14px; }
+
+  .founder-right {
+    background: var(--surface);
+    padding: 56px 48px;
+  }
+
+  .founder-quote {
+    font-family: 'Newsreader', serif;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.6;
+    margin-bottom: 36px;
+    padding-left: 24px;
+    border-left: 2px solid var(--accent);
+  }
+
+  .founder-bio {
+    font-family: 'Newsreader', serif;
+    font-size: 15px;
+    color: var(--ink-muted);
+    line-height: 1.8;
+    margin-bottom: 36px;
+  }
+
+  .founder-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .founder-tag {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 5px 12px;
+    border-radius: 100px;
+    border: 1px solid var(--border-light);
+    color: var(--ink-dim);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── TRACTION ── */
+  #traction {
+    padding: 120px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .traction-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 64px;
+  }
+
+  .traction-card {
+    background: var(--surface);
+    padding: 40px 36px;
+    text-align: center;
+  }
+
+  .traction-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 44px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .traction-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+  }
+
+  .traction-use-cases {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  .use-case-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    transition: border-color 0.2s;
+  }
+
+  .use-case-card:hover { border-color: var(--border-light); }
+
+  .use-case-icon { font-size: 24px; margin-bottom: 14px; }
+  .use-case-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+  .use-case-desc {
+    font-size: 12px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+
+  /* ── CTA ── */
+  #cta {
+    padding: 120px 48px 160px;
+    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .cta-glow {
+    position: absolute;
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse, rgba(59,130,246,0.08) 0%, transparent 70%);
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .cta-headline {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(36px, 5vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 640px;
+    margin: 0 auto 24px;
+    position: relative;
+  }
+
+  .cta-sub {
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--ink-muted);
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .cta-input-row {
+    display: flex;
+    gap: 12px;
+    max-width: 440px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .cta-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--ink);
+    padding: 14px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .cta-input:focus { border-color: var(--accent); }
+  .cta-input::placeholder { color: var(--ink-dim); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.08em;
+    color: var(--ink-dim);
+  }
+
+  .footer-logo span { color: var(--accent); }
+
+  .footer-copy {
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+    list-style: none;
+  }
+
+  .footer-links a {
+    font-size: 11px;
+    color: var(--ink-dim);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--ink-muted); }
+
+  /* ── ANIMATIONS ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 900px) {
+    nav { padding: 0 24px; }
+    .nav-links { display: none; }
+    #hero, #problem, #how, #features, #founder, #traction, #cta { padding-left: 24px; padding-right: 24px; }
+    .problem-grid { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .founder-layout { grid-template-columns: 1fr; }
+    .traction-grid { grid-template-columns: 1fr 1fr; }
+    .traction-use-cases { grid-template-columns: 1fr; }
+    .tracker-timeline { flex-direction: column; gap: 16px; }
+    .tracker-timeline::before { display: none; }
+    .how-step { grid-template-columns: 60px 1fr; }
+    .step-tech { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark"></div>
+    <span class="nav-logo-text">NOD<span>RIX</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#features">Platform</a></li>
+    <li><a href="#founder">Founder</a></li>
+    <li><a href="#cta" class="nav-cta">Request Access</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero" style="position:relative;">
+  <div class="hero-badge">
+    <span class="hero-badge-dot"></span>
+    Now in Private Beta · Document Intelligence Platform
+  </div>
+  <h1 class="hero-headline">
+    Borders shouldn't<br><em>stall</em> your<br>documents.
+  </h1>
+  <p class="hero-sub">
+    Nodrix is the AI infrastructure layer for cross-border document authentication — automating notarisation, apostille tracking, and fraud detection across jurisdictions.
+  </p>
+  <div class="hero-actions">
+    <a href="#cta" class="btn-primary">Request Early Access</a>
+    <a href="#how" class="btn-ghost">See How It Works →</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">$7<span>B+</span></div>
+      <div class="stat-label">Lost annually to document delays</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">118<span>+</span></div>
+      <div class="stat-label">Hague Convention jurisdictions</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">40<span>%</span></div>
+      <div class="stat-label">Cross-border deals stall on notarisation</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">19<span>%</span></div>
+      <div class="stat-label">YoY market growth (2025–2033)</div>
+    </div>
+  </div>
+
+  <!-- TERMINAL -->
+  <div class="hero-terminal-wrap">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="t-dot r"></div>
+        <div class="t-dot y"></div>
+        <div class="t-dot g"></div>
+        <span class="terminal-title">nodrix-verify · v2.1.4</span>
+      </div>
+      <div class="terminal-body">
+        <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">nodrix verify --doc INV-2024-8871.pdf</span></div>
+        <div class="t-line"><span class="t-output">✓ Document hash verified</span></div>
+        <div class="t-line"><span class="t-output">✓ Issuer identity confirmed</span></div>
+        <div class="t-line"><span class="t-warn">⚠ Jurisdiction: IN → DE apostille required</span></div>
+        <div class="t-line"></div>
+        <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">nodrix apostille --track NDXAP-9871</span></div>
+        <div class="t-line"><span class="t-info">→ MEA India: ✓ stamped 14h ago</span></div>
+        <div class="t-line"><span class="t-info">→ Embassy DE: ⟳ in queue (#3)</span></div>
+        <div class="t-line"><span class="t-output">ETA: ~6h · notify on complete</span></div>
+        <div class="t-line"></div>
+        <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">nodrix fraud-scan --id passport_001.jpg</span></div>
+        <div class="t-line"><span class="t-output">✓ MRZ integrity: PASS</span></div>
+        <div class="t-line"><span class="t-output">✓ UV pattern analysis: PASS</span></div>
+        <div class="t-line"><span class="t-output">✓ Liveness check: CONFIRMED</span></div>
+        <div class="t-line"><span class="t-output">Risk score: 0.04 / 1.0 — LOW</span></div>
+        <div class="t-line"></div>
+        <div class="t-line"><span class="t-prompt">$</span><span class="t-cursor"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="section-tag">The Problem</div>
+  <h2 class="section-headline">The world moves fast.<br><em>Paperwork doesn't.</em></h2>
+  <div class="problem-grid">
+    <div class="problem-card fade-up">
+      <div class="problem-num">01</div>
+      <div class="problem-title">The Notarisation Bottleneck</div>
+      <div class="problem-text">Millions of cross-border deals — real estate closings, employment contracts, corporate M&A — stall for weeks waiting for wet signatures and physical stamps from notaries operating in legacy systems.</div>
+      <div class="problem-metric">~3–8 weeks avg. delay per transaction</div>
+    </div>
+    <div class="problem-card fade-up">
+      <div class="problem-num">02</div>
+      <div class="problem-title">Apostille Opacity</div>
+      <div class="problem-text">The Hague Apostille Convention covers 118+ nations, but tracking a document through multiple legalisation authorities is still done via email, phone calls, and physical post — with zero visibility.</div>
+      <div class="problem-metric">118+ jurisdictions, 0 unified tracking</div>
+    </div>
+    <div class="problem-card fade-up">
+      <div class="problem-num">03</div>
+      <div class="problem-title">Identity Document Fraud</div>
+      <div class="problem-text">Forged passports, altered certificates, and fabricated corporate documents cost institutions billions annually. Manual verification is inconsistent, slow, and impossible to scale across high-volume workflows.</div>
+      <div class="problem-metric">$4.7B lost to doc fraud yearly (est.)</div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-tag">How It Works</div>
+  <h2 class="section-headline">From upload to<br><em>authenticated</em> — in minutes.</h2>
+  <div class="how-steps">
+    <div class="how-step fade-up">
+      <div class="step-num-col"><span class="step-num">01</span></div>
+      <div class="step-content">
+        <div class="step-title">Ingest & Classify</div>
+        <div class="step-desc">Upload any document — passport, notarised deed, corporate resolution, power of attorney. Nodrix's OCR and document intelligence layer identifies type, issuing authority, and jurisdiction in seconds.</div>
+      </div>
+      <div class="step-tech">
+        <span class="tech-tag blue">CV + OCR pipeline</span>
+        <span class="tech-tag cyan">Document classifier</span>
+        <span class="tech-tag">Multi-format support</span>
+      </div>
+    </div>
+    <div class="how-step fade-up">
+      <div class="step-num-col"><span class="step-num">02</span></div>
+      <div class="step-content">
+        <div class="step-title">AI Authenticity Scan</div>
+        <div class="step-desc">Computer vision models trained on millions of document samples detect tampering, forgery patterns, MRZ anomalies, and metadata inconsistencies — issuing a verified risk score with full reasoning trace.</div>
+      </div>
+      <div class="step-tech">
+        <span class="tech-tag blue">Fraud detection model</span>
+        <span class="tech-tag amber">MRZ analysis</span>
+        <span class="tech-tag cyan">Tamper detection</span>
+      </div>
+    </div>
+    <div class="how-step fade-up">
+      <div class="step-num-col"><span class="step-num">03</span></div>
+      <div class="step-content">
+        <div class="step-title">Automated Legalisation Routing</div>
+        <div class="step-desc">Based on source and destination jurisdictions, Nodrix determines the exact apostille or legalisation pathway — MEA, embassy chains, e-Apostille authorities — and initiates requests automatically via registered notary partners.</div>
+      </div>
+      <div class="step-tech">
+        <span class="tech-tag green">118+ jurisdiction DB</span>
+        <span class="tech-tag blue">e-Apostille API</span>
+        <span class="tech-tag amber">Notary network</span>
+      </div>
+    </div>
+    <div class="how-step fade-up">
+      <div class="step-num-col"><span class="step-num">04</span></div>
+      <div class="step-content">
+        <div class="step-title">Chain of Custody & Delivery</div>
+        <div class="step-desc">Every action — view, stamp, transmission — is cryptographically logged. Recipients receive tamper-evident documents with a scannable verification link, and all parties share a live audit trail.</div>
+      </div>
+      <div class="step-tech">
+        <span class="tech-tag cyan">Immutable audit log</span>
+        <span class="tech-tag blue">QR verification</span>
+        <span class="tech-tag green">Delivery receipt API</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRACKER DEMO -->
+  <div class="tracker-demo fade-up">
+    <div class="tracker-header">
+      <div class="tracker-title">Live Apostille Tracker</div>
+      <div class="tracker-id">NDXAP-2024-009871 · Power of Attorney · IN → DE</div>
+    </div>
+    <div class="tracker-timeline">
+      <div class="track-node">
+        <div class="track-dot done">✓</div>
+        <div class="track-label">Notarised</div>
+        <div class="track-jurisdiction">Mumbai, IN</div>
+      </div>
+      <div class="track-node">
+        <div class="track-dot done">✓</div>
+        <div class="track-label">MEA Stamp</div>
+        <div class="track-jurisdiction">New Delhi</div>
+      </div>
+      <div class="track-node">
+        <div class="track-dot done">✓</div>
+        <div class="track-label">Apostille Issued</div>
+        <div class="track-jurisdiction">MEA, India</div>
+      </div>
+      <div class="track-node">
+        <div class="track-dot active">⟳</div>
+        <div class="track-label">Embassy DE</div>
+        <div class="track-jurisdiction">Queue #3</div>
+      </div>
+      <div class="track-node">
+        <div class="track-dot pending">○</div>
+        <div class="track-label">Translation</div>
+        <div class="track-jurisdiction">Certified DE</div>
+      </div>
+      <div class="track-node">
+        <div class="track-dot pending">○</div>
+        <div class="track-label">Final Delivery</div>
+        <div class="track-jurisdiction">Recipient</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-tag">The Platform</div>
+  <h2 class="section-headline">Four modules.<br><em>One unified</em> layer.</h2>
+  <div class="features-grid">
+    <div class="feature-card fade-up">
+      <div class="feature-icon">🔍</div>
+      <div class="feature-title">AI Document Verification</div>
+      <div class="feature-desc">Deep analysis of document structure, issuer patterns, and embedded security features to flag forgeries before they move downstream.</div>
+      <ul class="feature-list">
+        <li>MRZ & barcode integrity checks</li>
+        <li>Font & layout anomaly detection</li>
+        <li>Metadata and EXIF forensics</li>
+        <li>Cross-reference against issuer registries</li>
+        <li>Risk score with full audit trace</li>
+      </ul>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon">🌐</div>
+      <div class="feature-title">Apostille & Legalisation Engine</div>
+      <div class="feature-desc">Jurisdiction-aware routing that automatically determines the correct authentication pathway and triggers it — no more manual embassy research.</div>
+      <ul class="feature-list">
+        <li>118+ Hague Convention jurisdictions</li>
+        <li>e-Apostille API integrations (US, UK, EU, SG)</li>
+        <li>Notary partner network in 40+ countries</li>
+        <li>Automated embassy submission queues</li>
+        <li>Real-time ETA and status notifications</li>
+      </ul>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon">🛡️</div>
+      <div class="feature-title">Fraud Detection & Identity</div>
+      <div class="feature-desc">Biometric liveness checks, face-match against documents, and AI-powered identity proofing for KYC-grade confidence on every verification.</div>
+      <ul class="feature-list">
+        <li>Liveness detection (anti-spoofing)</li>
+        <li>Face-match to passport / ID</li>
+        <li>Deepfake document analysis</li>
+        <li>Sanctions & watchlist screening</li>
+        <li>Confidence scoring with explainability</li>
+      </ul>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon">⛓️</div>
+      <div class="feature-title">Chain of Custody Management</div>
+      <div class="feature-desc">Cryptographically sealed audit trails and tamper-evident delivery receipts give all parties irrefutable proof of document provenance and handling.</div>
+      <ul class="feature-list">
+        <li>SHA-256 document fingerprinting</li>
+        <li>Immutable access log per document</li>
+        <li>Multi-party signature workflows</li>
+        <li>QR-based instant public verification</li>
+        <li>API-native for enterprise integration</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- TRACTION / USE CASES -->
+<section id="traction">
+  <div class="section-tag">Market</div>
+  <h2 class="section-headline">Every vertical that<br><em>crosses borders.</em></h2>
+  <div class="traction-grid">
+    <div class="traction-card">
+      <div class="traction-num" style="color: var(--accent);">$7B</div>
+      <div class="traction-label">Addressable market by 2033</div>
+    </div>
+    <div class="traction-card">
+      <div class="traction-num" style="color: var(--success);">19.8%</div>
+      <div class="traction-label">Projected CAGR 2025–2033</div>
+    </div>
+    <div class="traction-card">
+      <div class="traction-num" style="color: var(--seal);">118+</div>
+      <div class="traction-label">Hague Convention member states</div>
+    </div>
+    <div class="traction-card">
+      <div class="traction-num" style="color: var(--accent-2);">23%</div>
+      <div class="traction-label">Asia-Pacific growth rate (fastest)</div>
+    </div>
+  </div>
+  <div class="traction-use-cases">
+    <div class="use-case-card fade-up">
+      <div class="use-case-icon">🏢</div>
+      <div class="use-case-title">Corporate & M&A</div>
+      <div class="use-case-desc">Cross-border acquisitions, board resolutions, and shareholder agreements require multi-jurisdiction legalisation. Nodrix cuts weeks to hours.</div>
+    </div>
+    <div class="use-case-card fade-up">
+      <div class="use-case-icon">🎓</div>
+      <div class="use-case-title">Education & Immigration</div>
+      <div class="use-case-desc">Academic certificates, degree apostilles, and identity documents for student visas and foreign employment — automated end to end.</div>
+    </div>
+    <div class="use-case-card fade-up">
+      <div class="use-case-icon">🏠</div>
+      <div class="use-case-title">Real Estate & Finance</div>
+      <div class="use-case-desc">International property purchases, mortgage deeds, and KYC documentation for cross-border banking are verified and routed instantly.</div>
+    </div>
+    <div class="use-case-card fade-up">
+      <div class="use-case-icon">⚖️</div>
+      <div class="use-case-title">Legal & Compliance</div>
+      <div class="use-case-desc">Law firms and compliance teams use Nodrix as the verification backbone for client onboarding, due diligence, and court document filing.</div>
+    </div>
+    <div class="use-case-card fade-up">
+      <div class="use-case-icon">🚢</div>
+      <div class="use-case-title">Trade & Logistics</div>
+      <div class="use-case-desc">Bills of lading, certificates of origin, and customs documentation require authentication at every port of entry. Nodrix automates the chain.</div>
+    </div>
+    <div class="use-case-card fade-up">
+      <div class="use-case-icon">💊</div>
+      <div class="use-case-title">Healthcare & Pharma</div>
+      <div class="use-case-desc">Medical records, licensing credentials, and clinical trial documentation crossing borders require certified authentication at scale.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- FOUNDER -->
+<section id="founder">
+  <div class="section-tag">The Founder</div>
+  <h2 class="section-headline">Built by someone who<br><em>felt the friction.</em></h2>
+  <div class="founder-layout">
+    <div class="founder-left">
+      <div class="founder-avatar">UV</div>
+      <div class="founder-name">Utkarsh Varman</div>
+      <div class="founder-role">Founder & CEO · Nodrix</div>
+      <p style="font-family:'Newsreader',serif; font-size:14px; color:var(--ink-muted); line-height:1.7; margin-bottom: 32px;">
+        Building the infrastructure layer that cross-border document workflows have always needed but never had.
+      </p>
+      <div class="founder-links">
+        <a href="#" class="founder-link">
+          <span class="founder-link-icon">↗</span>
+          LinkedIn
+        </a>
+        <a href="mailto:utkarsh@nodrix.io" class="founder-link">
+          <span class="founder-link-icon">@</span>
+          utkarsh@nodrix.io
+        </a>
+        <a href="#" class="founder-link">
+          <span class="founder-link-icon">↗</span>
+          Twitter / X
+        </a>
+      </div>
+    </div>
+    <div class="founder-right">
+      <div class="founder-quote">
+        "Every time a critical document misses a deadline because it's sitting in an embassy queue, a deal dies, a student misses an admission, a family gets delayed. We built Nodrix because the solution to that problem is software — and nobody had built it right."
+      </div>
+      <div class="founder-bio">
+        Utkarsh founded Nodrix after experiencing the chaos of cross-border document authentication firsthand — watching critical transactions stall for weeks on bureaucratic paperwork that should take hours. He brings deep expertise at the intersection of legal infrastructure, AI systems, and international compliance, and is building Nodrix to become the authentication backbone for the borderless economy.
+        <br><br>
+        Nodrix is the result of two years of research into the Hague Apostille system, e-Apostille API landscapes across 40+ countries, and the technical architecture needed to make fraud detection work reliably at scale. The team is hiring across AI/ML engineering, legal partnerships, and enterprise sales.
+      </div>
+      <div class="founder-tags">
+        <span class="founder-tag">Document Intelligence</span>
+        <span class="founder-tag">Legal Tech</span>
+        <span class="founder-tag">Identity Verification</span>
+        <span class="founder-tag">Cross-border Infra</span>
+        <span class="founder-tag">Hague Convention</span>
+        <span class="founder-tag">AI / ML</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- CTA -->
+<section id="cta" style="position:relative;">
+  <div class="cta-glow"></div>
+  <div class="section-tag" style="justify-content:center;">Early Access</div>
+  <h2 class="cta-headline">Stop losing deals<br>to <em>paperwork.</em></h2>
+  <p class="cta-sub">Join the waitlist. First access for legal teams, fintechs, and enterprises.</p>
+  <div class="cta-input-row">
+    <input class="cta-input" type="email" placeholder="work@company.com">
+    <button class="btn-primary">Join Waitlist</button>
+  </div>
+  <p style="font-size:11px; color:var(--ink-dim); margin-top:16px; letter-spacing:0.06em;">No spam. Invite-only beta. Cancel anytime.</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">NOD<span>RIX</span></div>
+  <div class="footer-copy">© 2025 Nodrix Inc. All rights reserved.</div>
+  <ul class="footer-links">
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Terms</a></li>
+    <li><a href="#">Security</a></li>
+    <li><a href="mailto:utkarsh@nodrix.io">Contact</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Intersection Observer for fade-up animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, 80 * (Array.from(entry.target.parentElement.children).indexOf(entry.target)));
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Typewriter for terminal (re-animates on scroll)
+  const termLines = document.querySelectorAll('.terminal-body .t-line');
+  termLines.forEach((line, i) => {
+    line.style.opacity = '0';
+    line.style.transform = 'translateX(-4px)';
+    line.style.transition = `opacity 0.3s ease ${i * 80}ms, transform 0.3s ease ${i * 80}ms`;
+    setTimeout(() => {
+      line.style.opacity = '1';
+      line.style.transform = 'translateX(0)';
+    }, 800 + i * 80);
+  });
+
+  // Smooth nav link active state
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 100) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === `#${current}` ? 'var(--ink)' : '';
+    });
+  });
+</script>
+</body>
+</html>
